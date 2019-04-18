@@ -3,12 +3,13 @@ const bodyParser = require('body-parser');
 let User = require('../models/user');
 let passport = require('passport');
 let authenticate = require('../authenticate');
+const cors = require('./cors');
 
 let router = express.Router();
 router.use(bodyParser.json());
 
 /* GET users listing. */
-router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+router.get('/', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
 	User.find({})
 		.then(
 			(user) => {
@@ -21,7 +22,7 @@ router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, ne
 		.catch((err) => next(err));
 });
 
-router.post('/signup', (req, res, next) => {
+router.post('/signup', cors.corsWithOptions, (req, res, next) => {
 	User.register(new User({ username: req.body.username }), req.body.password, (err, user) => {
 		if (err) {
 			res.statusCode = 500;
@@ -47,7 +48,7 @@ router.post('/signup', (req, res, next) => {
 	});
 });
 
-router.post('/login', passport.authenticate('local'), (req, res) => {
+router.post('/login', cors.corsWithOptions, passport.authenticate('local'), (req, res) => {
 	let token = authenticate.getToken({ _id: req.user._id });
 	res.statusCode = 200;
 	res.setHeader('Content-Type', 'application/json');
